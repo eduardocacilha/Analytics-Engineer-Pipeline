@@ -1,0 +1,7 @@
+payment_type_id,payment_type_description
+1,Cartão de crédito
+2,Dinheiro
+3,Sem cobrança
+4,Disputa
+5,Desconhecido
+6,Corrida anulada
