@@ -37,3 +37,12 @@ disponibilizado pela cidade de Nova York. Bom candidato para este projeto porque
 Fonte oficial: https://www.nyc.gov/site/tlc/about/tlc-trip-record-data.page
 
 ## Arquitetura (visão geral)
+
+S3 (raw/bronze) → Databricks (bronze → silver → gold, via dbt) → Power BI ↑ ↑ script Python dashboards + RLS (ingestão)
+
+
+Ver detalhes em [`docs/architecture.md`](docs/architecture.md).
+
+## Estrutura do repositório
+
+data-pipeline/ ├── README.md ├── requirements.txt ├── .gitignore ├── docs/ │ ├── roadmap.md # plano semana a semana (8 semanas) │ ├── architecture.md # arquitetura detalhada + diagrama │ └── setup-guide.md # passo a passo: contas AWS + Databricks ├── scripts/ │ └── ingest_to_s3.py # baixa os arquivos da NYC TLC e sobe pro S3 (raw) ├── notebooks/ # notebooks Databricks (bronze → silver, exploração) └── dbt/ └── nyc_taxi_analytics/ # projeto dbt (silver/gold) ├── dbt_project.yml ├── models/ │ ├── staging/ # bronze → silver (limpeza, tipagem) │ ├── intermediate/ # joins e regras de negócio intermediárias │ └── marts/ # gold (fatos e dimensões prontos pro BI) └── seeds/ # dados de referência estáticos (ex: zonas)
