@@ -1,13 +1,4 @@
--- Camada silver: limpeza e padronização da bronze, sem regra de negócio pesada.
--- Grão: 1 linha = 1 corrida.
---
--- Observação importante: o dataset da NYC TLC NÃO tem um ID de corrida nativo.
--- Por isso geramos uma surrogate key (trip_id) a partir da combinação de colunas
--- que, juntas, tornam a linha praticamente única (vendor + timestamps + zonas).
---
--- Deduplicação: a bronze pode conter linhas duplicadas (ex: reprocessamento de
--- ingestão). Mantemos apenas o registro mais recente por trip_id (_ingested_at
--- mais alto), via ROW_NUMBER() + QUALIFY.
+
 
 with source as (
 

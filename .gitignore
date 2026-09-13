@@ -28,3 +28,7 @@ aprendizados.md
 docs/roadmap.md
 docs/setup-guide.md
 logs/
+resumo-mentoria-*.md
+
+# Trabalho em andamento (ainda não pronto para o repo público)
+notebooks/01_silver_ingestion.py
