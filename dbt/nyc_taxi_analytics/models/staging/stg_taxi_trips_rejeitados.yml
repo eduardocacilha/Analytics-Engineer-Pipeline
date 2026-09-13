@@ -1,0 +1,12 @@
+version: 2
+
+models:
+  - name: stg_taxi_trips_rejeitados
+    description: >
+      Trilha de auditoria (camada silver): linhas da bronze descartadas de
+      stg_taxi_trips por timestamp fora do range de sanidade esperado.
+      Não é consumida por nenhum modelo downstream — serve só pra consulta
+      manual de "o que foi descartado e por quê".
+    columns:
+      - name: motivo_rejeicao
+        description: "Motivo pelo qual a linha foi descartada de stg_taxi_trips."

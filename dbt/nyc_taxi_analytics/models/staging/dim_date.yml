@@ -1,0 +1,23 @@
+version: 2
+
+models:
+  - name: dim_date
+    description: "Dimensão de calendário (camada silver). Grão: 1 linha por dia, cobrindo o ano civil de 2024."
+    columns:
+      - name: date_id
+        description: "Chave da dimensão. Data do dia."
+        tests:
+          - not_null
+          - unique
+      - name: ano
+        description: "Ano da data."
+      - name: mes
+        description: "Mês da data (1-12)."
+      - name: dia
+        description: "Dia do mês."
+      - name: dia_semana_numero
+        description: "Dia da semana (1=domingo, 7=sábado)."
+      - name: trimestre
+        description: "Trimestre do ano (1-4)."
+      - name: is_fim_de_semana
+        description: "True quando a data cai em sábado ou domingo."

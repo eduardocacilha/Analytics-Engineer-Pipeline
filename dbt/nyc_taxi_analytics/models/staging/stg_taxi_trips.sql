@@ -57,6 +57,12 @@ renamed as (
       and payment_type is not null
       and passenger_count is not null
       and trip_distance is not null
+      -- filtro de sanidade temporal: a TLC só disponibiliza dados eletrônicos
+      -- a partir de 2009, então qualquer coisa antes disso (ou no futuro) é
+      -- erro de relógio/sensor do veículo, não corrida de verdade. As linhas
+      -- descartadas aqui ficam auditadas em stg_taxi_trips_rejeitados.
+      and tpep_pickup_datetime >= cast('2009-01-01' as timestamp)
+      and tpep_pickup_datetime <= current_date()
 
 ),
 

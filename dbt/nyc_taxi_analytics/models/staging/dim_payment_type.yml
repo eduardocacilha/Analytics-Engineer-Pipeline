@@ -1,0 +1,13 @@
+version: 2
+
+models:
+  - name: dim_payment_type
+    description: "Dimensão de formas de pagamento (camada silver). Grão: 1 linha por código de pagamento."
+    columns:
+      - name: payment_type_id
+        description: "Chave da dimensão (código de pagamento da TLC)."
+        tests:
+          - not_null
+          - unique
+      - name: payment_type_description
+        description: "Descrição legível da forma de pagamento."

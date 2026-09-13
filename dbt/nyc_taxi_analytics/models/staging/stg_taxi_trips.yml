@@ -2,7 +2,12 @@ version: 2
 
 models:
   - name: stg_taxi_trips
-    description: "Corridas de táxi limpas, padronizadas e deduplicadas (camada silver). Grão: 1 linha = 1 corrida."
+    description: >
+      Corridas de táxi limpas, padronizadas e deduplicadas (camada silver).
+      Grão: 1 linha = 1 corrida. Inclui filtro de sanidade temporal
+      (pickup_at entre 2009-01-01 e hoje) — linhas fora desse range são
+      erro de relógio/sensor do veículo e ficam auditadas em
+      stg_taxi_trips_rejeitados, não descartadas silenciosamente.
     columns:
       - name: trip_id
         description: "Surrogate key gerada a partir de vendor_id + pickup_at + dropoff_at + pickup/dropoff_location_id, já que o dataset original não tem ID de corrida nativo. Usada também como chave de deduplicação (mantém o registro com _ingested_at mais recente)."

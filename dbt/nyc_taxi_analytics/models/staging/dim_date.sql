@@ -1,4 +1,8 @@
+{{ config(materialized='table') }}
 
+-- Camada silver: dimensão de calendário. Movida da gold pra cá — é
+-- modelagem de dado, não métrica de negócio. Gerada de forma independente
+-- (date_spine), não derivada do fato, pra não perder dias sem corrida.
 
 with spine as (
 

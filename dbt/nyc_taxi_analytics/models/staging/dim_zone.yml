@@ -1,0 +1,17 @@
+version: 2
+
+models:
+  - name: dim_zone
+    description: "Dimensão de zonas de táxi de Nova York (camada silver). Grão: 1 linha por LocationID (265 zonas)."
+    columns:
+      - name: zone_id
+        description: "Chave da dimensão (LocationID da TLC)."
+        tests:
+          - not_null
+          - unique
+      - name: borough
+        description: "Bairro (borough) ao qual a zona pertence."
+      - name: zone_name
+        description: "Nome da zona."
+      - name: service_zone
+        description: "Classificação de serviço (Yellow Zone, Boro Zone, Airports, EWR)."

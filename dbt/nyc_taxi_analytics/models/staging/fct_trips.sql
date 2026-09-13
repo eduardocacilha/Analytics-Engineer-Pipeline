@@ -5,14 +5,18 @@
     on_schema_change='append_new_columns'
 ) }}
 
--- Camada gold: fato de corridas. Grão: 1 linha = 1 corrida (chave: trip_id).
+-- Camada silver: fato de corridas. Grão: 1 linha = 1 corrida (chave: trip_id).
+-- Movido da gold pra cá — débito técnico corrigido: a silver antiga era
+-- quase um espelho da bronze, então a modelagem dimensional (dimensões +
+-- fato) agora vive na silver. A gold passa a conter só métricas de negócio
+-- pré-agregadas, consumidas a partir deste modelo.
 --
 -- MODELAGEM (star schema puro)
 -- O fato guarda apenas as chaves estrangeiras para as dimensões e as métricas.
 -- Atributos descritivos (nome da zona, borough, descrição do pagamento) NÃO são
--- desnormalizados aqui de propósito — quem faz essa junção é a camada de BI,
--- via relacionamentos com dim_zone, dim_payment_type e dim_date. Trazer esses
--- textos para dentro do fato inflaria a tabela e duplicaria a dimensão.
+-- desnormalizados aqui de propósito — quem faz essa junção é a camada de
+-- consumo (BI ou os modelos de métrica da gold), via relacionamentos com
+-- dim_zone, dim_payment_type e dim_date.
 --
 -- DIMENSÕES DEGENERADAS
 -- vendor_id, rate_code_id e store_and_fwd_flag ficam no próprio fato: são

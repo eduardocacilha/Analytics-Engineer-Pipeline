@@ -2,157 +2,41 @@ version: 2
 
 models:
 
-  - name: fct_trips
+  - name: agg_corridas_por_mes
     description: >
-      Fato de corridas de táxi (camada gold). Grão: 1 linha = 1 corrida.
-      Carga incremental por pickup_at, com merge por trip_id. Contém apenas
-      chaves estrangeiras e métricas — os atributos descritivos vêm das
-      dimensões, via join na camada de BI.
+      Métrica de negócio (camada gold): total de corridas por mês.
+      Grão: 1 linha por mês (ano_mes). Consome fct_trips, que agora vive
+      na camada silver.
     columns:
-      - name: trip_id
-        description: "Chave do fato. Surrogate key herdada da camada silver."
+      - name: ano_mes
+        description: "Chave da métrica. Mês de referência no formato yyyy-MM."
         tests:
           - not_null
           - unique
+      - name: mes_referencia
+        description: "Primeiro dia do mês de referência (usado para ordenação/plotagem no BI)."
+      - name: total_corridas
+        description: "Quantidade de corridas com pickup nesse mês."
+      - name: ticket_medio
+        description: "Valor médio de total_amount das corridas do mês."
+      - name: receita_total
+        description: "Soma de total_amount das corridas do mês."
 
-      - name: pickup_date_id
-        description: "FK para dim_date. Data do início da corrida (pickup_at truncado para dia)."
-        tests:
-          - not_null
-          - relationships:
-              to: ref('dim_date')
-              field: date_id
-
-      - name: pickup_location_id
-        description: "FK para dim_zone. Zona de embarque."
-        tests:
-          - not_null
-          - relationships:
-              to: ref('dim_zone')
-              field: zone_id
-
-      - name: dropoff_location_id
-        description: "FK para dim_zone. Zona de desembarque."
-        tests:
-          - not_null
-          - relationships:
-              to: ref('dim_zone')
-              field: zone_id
-
-      - name: payment_type_id
-        description: "FK para dim_payment_type. Forma de pagamento da corrida."
-        tests:
-          - not_null
-          - relationships:
-              to: ref('dim_payment_type')
-              field: payment_type_id
-
+  - name: agg_corridas_por_vendor
+    description: >
+      Métrica de negócio (camada gold): total de corridas por fornecedor
+      (vendor_id — o dataset da TLC não tem ID de motorista, só o provedor
+      TPEP). Grão: 1 linha por vendor. Consome fct_trips, que agora vive
+      na camada silver.
+    columns:
       - name: vendor_id
-        description: "Dimensão degenerada: fornecedor do sistema (TPEP provider) que registrou a corrida."
-
-      - name: rate_code_id
-        description: "Dimensão degenerada: código da tarifa aplicada (1=padrão, 2=JFK, 3=Newark, 4=Nassau/Westchester, 5=negociada, 6=grupo)."
-
-      - name: store_and_fwd_flag
-        description: "Dimensão degenerada: Y/N, indica se o registro ficou guardado no veículo antes de ser transmitido."
-
-      - name: pickup_at
-        description: "Timestamp de início da corrida. Mantido no grão fino para análise por hora do dia."
-        tests:
-          - not_null
-
-      - name: dropoff_at
-        description: "Timestamp de fim da corrida."
-        tests:
-          - not_null
-
-      - name: passenger_count
-        description: "Número de passageiros informado pelo motorista."
-
-      - name: trip_distance_miles
-        description: "Distância da corrida em milhas, medida pelo taxímetro."
-
-      - name: fare_amount
-        description: "Tarifa base calculada pelo taxímetro."
-
-      - name: extra_amount
-        description: "Sobretaxas diversas (horário de pico, período noturno)."
-
-      - name: mta_tax_amount
-        description: "Taxa fixa da MTA."
-
-      - name: tip_amount
-        description: "Gorjeta. Só é registrada em pagamento com cartão — em dinheiro vem zerada."
-
-      - name: tolls_amount
-        description: "Pedágios pagos na corrida."
-
-      - name: improvement_surcharge_amount
-        description: "Sobretaxa fixa de melhoria."
-
-      - name: congestion_surcharge_amount
-        description: "Sobretaxa de congestionamento (áreas específicas de Manhattan)."
-
-      - name: total_amount
-        description: "Valor total cobrado ao passageiro (não inclui gorjeta em dinheiro)."
-        tests:
-          - not_null
-
-      - name: trip_duration_minutes
-        description: "Métrica derivada: duração da corrida em minutos (dropoff_at - pickup_at)."
-
-      - name: amount_per_mile
-        description: "Métrica derivada: total_amount dividido pela distância. Nulo quando a distância é zero."
-
-      - name: tip_percentage
-        description: >
-          Métrica derivada: gorjeta como % da tarifa base. Nulo quando fare_amount
-          é zero. Só é analiticamente válida para payment_type_id = 1 (cartão);
-          gorjeta em dinheiro não é capturada pelo dataset.
-
-  - name: dim_zone
-    description: "Dimensão de zonas de táxi de Nova York. Grão: 1 linha por LocationID (265 zonas)."
-    columns:
-      - name: zone_id
-        description: "Chave da dimensão (LocationID da TLC)."
+        description: "Chave da métrica. Fornecedor do sistema TPEP que registrou a corrida."
         tests:
           - not_null
           - unique
-      - name: borough
-        description: "Bairro (borough) ao qual a zona pertence."
-      - name: zone_name
-        description: "Nome da zona."
-      - name: service_zone
-        description: "Classificação de serviço (Yellow Zone, Boro Zone, Airports, EWR)."
-
-  - name: dim_payment_type
-    description: "Dimensão de formas de pagamento. Grão: 1 linha por código de pagamento."
-    columns:
-      - name: payment_type_id
-        description: "Chave da dimensão (código de pagamento da TLC)."
-        tests:
-          - not_null
-          - unique
-      - name: payment_type_description
-        description: "Descrição legível da forma de pagamento."
-
-  - name: dim_date
-    description: "Dimensão de calendário. Grão: 1 linha por dia, cobrindo o ano civil de 2024."
-    columns:
-      - name: date_id
-        description: "Chave da dimensão. Data do dia."
-        tests:
-          - not_null
-          - unique
-      - name: ano
-        description: "Ano da data."
-      - name: mes
-        description: "Mês da data (1-12)."
-      - name: dia
-        description: "Dia do mês."
-      - name: dia_semana_numero
-        description: "Dia da semana (1=domingo, 7=sábado)."
-      - name: trimestre
-        description: "Trimestre do ano (1-4)."
-      - name: is_fim_de_semana
-        description: "True quando a data cai em sábado ou domingo."
+      - name: total_corridas
+        description: "Quantidade de corridas registradas por esse vendor."
+      - name: ticket_medio
+        description: "Valor médio de total_amount das corridas desse vendor."
+      - name: receita_total
+        description: "Soma de total_amount das corridas desse vendor."
