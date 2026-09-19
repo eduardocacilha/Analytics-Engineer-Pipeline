@@ -85,3 +85,23 @@ spark.sql("""
         COUNT(DISTINCT _source_file) AS arquivos_distintos
     FROM workspace.bronze.nyc_taxi_trips
 """).show()
+
+# COMMAND ----------
+
+# MAGIC %sql
+# MAGIC SELECT COUNT(*) FROM workspace.gold.dim_zone;
+
+# COMMAND ----------
+
+# MAGIC %sql
+# MAGIC SELECT pickup_date_id, COUNT(*) AS corridas
+# MAGIC FROM workspace.gold.fct_trips
+# MAGIC WHERE pickup_date_id NOT BETWEEN DATE'2024-01-01' AND DATE'2024-12-31'
+# MAGIC GROUP BY pickup_date_id
+# MAGIC ORDER BY pickup_date_id;
+
+# COMMAND ----------
+
+# MAGIC %sql
+# MAGIC SELECT * FROM workspace.gold.agg_corridas_por_mes ORDER BY mes_referencia;
+# MAGIC --SELECT * FROM workspace.gold.agg_corridas_por_vendor;
