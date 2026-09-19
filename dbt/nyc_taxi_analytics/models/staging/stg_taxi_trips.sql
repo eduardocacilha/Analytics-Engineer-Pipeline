@@ -57,12 +57,16 @@ renamed as (
       and payment_type is not null
       and passenger_count is not null
       and trip_distance is not null
-      -- filtro de sanidade temporal: a TLC só disponibiliza dados eletrônicos
-      -- a partir de 2009, então qualquer coisa antes disso (ou no futuro) é
-      -- erro de relógio/sensor do veículo, não corrida de verdade. As linhas
-      -- descartadas aqui ficam auditadas em stg_taxi_trips_rejeitados.
-      and tpep_pickup_datetime >= cast('2009-01-01' as timestamp)
-      and tpep_pickup_datetime <= current_date()
+      -- filtro de sanidade temporal: este projeto ingeriu SÓ dados de 2024, e a
+      -- dim_date cobre exatamente o ano civil de 2024. Qualquer pickup fora de
+      -- [2024-01-01, 2025-01-01) é timestamp corrompido (relógio/sensor do
+      -- veículo) — não existe corrida real de 2002 ou 2090 num arquivo de 2024.
+      -- Restringir aqui garante integridade referencial fato -> dim_date. As
+      -- linhas descartadas ficam auditadas em stg_taxi_trips_rejeitados.
+      -- IMPORTANTE: ao ingerir novos anos, ampliar ESTE range E o date_spine de
+      -- dim_date juntos — os dois têm que cobrir o mesmo período.
+      and tpep_pickup_datetime >= cast('2024-01-01' as timestamp)
+      and tpep_pickup_datetime <  cast('2025-01-01' as timestamp)
 
 ),
 
