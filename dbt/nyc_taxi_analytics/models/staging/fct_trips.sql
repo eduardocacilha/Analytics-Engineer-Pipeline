@@ -49,7 +49,13 @@ final as (
         trip_id,
 
         -- chaves estrangeiras para as dimensões
-        cast(pickup_at as date)       as pickup_date_id,
+        -- pickup_date_id vem do JOIN com dim_date (e não de um cast direto):
+        -- isso torna a dependência fato -> dim_date visível no DAG do dbt e
+        -- reforça a integridade referencial no próprio modelo, não só no teste
+        -- generic relationships. Como o filtro de stg_taxi_trips garante que
+        -- todo pickup cai em [2024-01-01, 2025-01-01) e a dim_date cobre
+        -- exatamente esse ano, o inner join nunca descarta corrida real.
+        d.date_id                     as pickup_date_id,
         pickup_location_id,
         dropoff_location_id,
         cast(payment_type_id as int)  as payment_type_id,
@@ -93,7 +99,9 @@ final as (
             then round(tip_amount / fare_amount * 100, 2)
         end as tip_percentage
 
-    from trips
+    from trips t
+    inner join {{ ref('dim_date') }} d
+        on cast(t.pickup_at as date) = d.date_id
 
 )
 
