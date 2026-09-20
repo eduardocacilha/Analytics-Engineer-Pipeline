@@ -32,3 +32,4 @@ resumo-mentoria-*.md
 
 # Trabalho em andamento (ainda não pronto para o repo público)
 notebooks/01_silver_ingestion.py
+docs/storytelling_dag.md

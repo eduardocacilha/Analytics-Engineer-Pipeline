@@ -40,3 +40,69 @@ models:
         description: "Valor médio de total_amount das corridas desse vendor."
       - name: receita_total
         description: "Soma de total_amount das corridas desse vendor."
+
+  - name: agg_receita_por_zona
+    description: >
+      Métrica de negócio (camada gold): receita e volume por zona/borough de
+      ORIGEM (pickup). Consome fct_trips + dim_zone. Grão: 1 linha por
+      combinação borough + zone_name. Dá à dim_zone um consumidor downstream.
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns:
+            - borough
+            - zone_name
+    columns:
+      - name: borough
+        description: "Distrito de origem da corrida (vindo de dim_zone)."
+        tests:
+          - not_null
+      - name: zone_name
+        description: "Nome da zona de origem da corrida (vindo de dim_zone)."
+        tests:
+          - not_null
+      - name: total_corridas
+        description: "Quantidade de corridas que saíram dessa zona."
+      - name: receita_total
+        description: "Soma de total_amount das corridas que saíram dessa zona."
+      - name: ticket_medio
+        description: "Valor médio de total_amount das corridas que saíram dessa zona."
+
+  - name: agg_receita_por_pagamento
+    description: >
+      Métrica de negócio (camada gold): receita, volume e gorjeta por tipo de
+      pagamento. Consome fct_trips + dim_payment_type. Grão: 1 linha por tipo.
+      As métricas de gorjeta evidenciam que tip só é registrado em cartão.
+    columns:
+      - name: payment_type_description
+        description: "Chave da métrica. Descrição do tipo de pagamento (vinda de dim_payment_type)."
+        tests:
+          - not_null
+          - unique
+      - name: total_corridas
+        description: "Quantidade de corridas com esse tipo de pagamento."
+      - name: receita_total
+        description: "Soma de total_amount das corridas desse tipo."
+      - name: ticket_medio
+        description: "Valor médio de total_amount das corridas desse tipo."
+      - name: gorjeta_total
+        description: "Soma de tip_amount. Só materialmente > 0 em cartão."
+      - name: gorjeta_media
+        description: "Média de tip_amount. Alta em cartão, ~0 em dinheiro — prova o argumento analítico."
+
+  - name: agg_qualidade_ingestao
+    description: >
+      Modelo de observabilidade (camada gold): taxa de rejeição da ingestão.
+      Consome stg_taxi_trips_rejeitados + fct_trips e calcula pct_rejeicao por
+      motivo. Grão: 1 linha por motivo_rejeicao. Indicador de saúde de pipeline.
+    columns:
+      - name: motivo_rejeicao
+        description: "Chave. Motivo pelo qual as linhas foram descartadas de stg_taxi_trips."
+        tests:
+          - not_null
+          - unique
+      - name: linhas_rejeitadas
+        description: "Quantidade de linhas da bronze descartadas por esse motivo."
+      - name: linhas_aceitas
+        description: "Total de linhas aceitas no fato (denominador, igual para todo motivo)."
+      - name: pct_rejeicao
+        description: "linhas_rejeitadas / (rejeitadas + aceitas) * 100. Taxa de rejeição."
