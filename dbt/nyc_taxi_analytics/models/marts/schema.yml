@@ -48,9 +48,10 @@ models:
       combinação borough + zone_name. Dá à dim_zone um consumidor downstream.
     tests:
       - dbt_utils.unique_combination_of_columns:
-          combination_of_columns:
-            - borough
-            - zone_name
+          arguments:
+            combination_of_columns:
+              - borough
+              - zone_name
     columns:
       - name: borough
         description: "Distrito de origem da corrida (vindo de dim_zone)."

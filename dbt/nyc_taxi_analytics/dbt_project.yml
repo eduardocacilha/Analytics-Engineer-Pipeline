@@ -19,9 +19,13 @@ models:
     staging:
       +materialized: view
       +schema: silver
-    intermediate:
-      +materialized: view
-      +schema: silver
     marts:
       +materialized: table
       +schema: gold
+
+# Seeds sao dado de referencia bruto (lookups da TLC carregados como vieram),
+# entao moram na bronze, ao lado da source nyc_taxi_trips. As dimensoes
+# conformadas que nascem deles (dim_zone, dim_payment_type) ficam na silver.
+seeds:
+  nyc_taxi_analytics:
+    +schema: bronze
