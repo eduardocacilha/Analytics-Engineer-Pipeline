@@ -11,7 +11,7 @@ bronze → silver → gold com dbt, com testes de dados e snapshot SCD2.
 - ✅ **Gold** — 5 agregados de consumo: corridas por mês e por vendor, receita por zona e por pagamento, qualidade da ingestão
 - ✅ **Testes** — generic (`not_null`, `unique`, `relationships`, `dbt_utils`) + 5 singular, com severidade `error`/`warn`
 - ✅ **Snapshot SCD2** — `snap_trip_financeiro` (demonstração)
-- ✅ **CI** — GitHub Actions roda `dbt parse` a cada push
+- ⏳ **CI** — GitHub Actions com `dbt parse` + `sqlfluff` (planejado)
 - ⏳ **Orquestração** — Databricks Workflows (depende de tornar a bronze idempotente)
 - ⏳ **BI** — Power BI com RLS
 
@@ -23,7 +23,7 @@ bronze → silver → gold com dbt, com testes de dados e snapshot SCD2.
 | Processamento | Databricks Free Edition + Delta Lake (Unity Catalog) |
 | Transformação | dbt-core 1.12 + dbt-databricks |
 | Qualidade | dbt tests + dbt_utils |
-| CI | GitHub Actions |
+| CI | GitHub Actions (planejado) |
 | Orquestração | Databricks Workflows (planejado) |
 | BI | Power BI (planejado) |
 | Linguagens | SQL, Python (PySpark) |
@@ -58,10 +58,9 @@ entrega agregados prontos para consumo — a justificativa está em
 │   ├── tests/         # testes singulares
 │   ├── seeds/         # lookups da TLC (zonas, pagamento)
 │   └── macros/        # generate_schema_name
-├── docs/
-│   ├── architecture.md
-│   └── data_dictionary.md
-└── .github/workflows/ci.yml
+└── docs/
+    ├── architecture.md
+    └── data_dictionary.md
 ```
 
 ## Como rodar
